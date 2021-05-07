@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bhav Data</title>
+</head>
+<body>
+    <a href="{% url 'savedata' %}">Save Data</a> <br><br>
+    <table border="1">
+        <thead>
+        <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Open</th>
+            <th>High</th>
+            <th>Low</th>
+            <th>Close</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for dt in data %}
+        <tr>            
+            <td>{{dt.code}}</td>
+            <td>{{dt.name}}</td>
+            <td>{{dt.open}}</td>
+            <td>{{dt.high}}</td>
+            <td>{{dt.low}}</td>
+            <td>{{dt.close}}</td>            
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
