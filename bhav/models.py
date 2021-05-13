@@ -10,3 +10,12 @@ class BhavData(models.Model):
     close = models.FloatField()
     date = models.DateTimeField(auto_now_add=True) 
     
+    def to_json(self):
+        return {
+            'code': self.code,
+            'name': self.name,
+            'open': self.open,
+            'high': self.high,
+            'low': self.low,
+            'close': self.close,            
+        }
