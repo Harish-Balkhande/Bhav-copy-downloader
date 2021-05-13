@@ -134,5 +134,3 @@ CACHES = {
     }
 }
 
-downloads = os.path.join(BASE_DIR, "zerodha", 'downloads')
-print(downloads)
