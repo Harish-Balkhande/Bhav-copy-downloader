@@ -1,12 +1,20 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static "bhav/settings/css/bootstrap.css" %}" />
     <title>Bhav Data</title>
 </head>
 <body>
-    <a href="{% url 'savedata' %}">Save Data</a> <br><br>
+    <br>
+    <form action="{% url 'search' %}" method="GET">
+        {% csrf_token %}
+        {{form}}
+        <input type="submit" value="submit">
+    </form>
+<br><br>
     <table border="1">
         <thead>
         <tr>
@@ -18,7 +26,7 @@
             <th>Close</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody id="myTable">
         {% for dt in data %}
         <tr>            
             <td>{{dt.code}}</td>
@@ -31,5 +39,9 @@
         {% endfor %}
         </tbody>
     </table>
+
+    <script src="{% static "bahv/settings/js/jquery.js" %}"></script>
+    <script src="{% static "bahv/settings/js/popper.js" %}"></script>
+    <script src="{% static "bahv/settings/js/bootstrap.js" %}"></script>
 </body>
 </html>

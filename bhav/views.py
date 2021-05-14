@@ -2,15 +2,18 @@ from django.shortcuts import render, HttpResponse
 # from .models import BhavData
 import requests, zipfile, io, os, csv
 from csv import DictReader
-# from django.conf import settings
-# from django.core.cache.backends.base import DEFAULT_TIMEOUT
+from django.conf import settings
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
 # from django.views.decorators.cache import cache_page
 from django.core.cache import cache
 import json
 # import datetime
 from bs4 import BeautifulSoup
+from .forms import search_form
+# RegEx
+import re
 
-# CACHE_TTL = getattr(settings ,'CACHE_TTL' , DEFAULT_TIMEOUT)
+CACHE_TTL = getattr(settings ,'CACHE_TTL' , DEFAULT_TIMEOUT)
 
 def background_task(request):
     # Web scrapping to get link
@@ -38,7 +41,8 @@ def background_task(request):
             os.rename(old_name, "bhav/downloads/bhavcopy.csv")
         os.remove("bhav/downloads/Bhav_copy.ZIP")
 
-# Cash data into redis from downloaded bhav copy
+
+    # Cashe data into redis from downloaded bhav copy
     with open('bhav/downloads/bhavcopy.csv', mode='r') as read_obj:
         csv_reader = DictReader(read_obj)
         data = []
@@ -55,9 +59,9 @@ def background_task(request):
         
         cache_str = json.dumps(data)
         # print(cache_str)
-        cache.set('Data', cache_str)
+        cache.set('Data', cache_str, timeout=CACHE_TTL)
     os.remove("bhav/downloads/bhavcopy.csv")
-    return HttpResponse(cache_str)
+    # return HttpResponse(cache_str)
     
 
 def Show_data(request):    
@@ -67,9 +71,39 @@ def Show_data(request):
         received = json.loads(cache_data)
         # print(received)
         print("Data from cache=======================")
-        return render(request, "bhav/showdata.html", {'data':received})
-
+        
     else:
-        return HttpResponse("Data not found in cache")    
+        background_task(request)
+        cache_data = cache.get('Data')
+        received = json.loads(cache_data)
+    fm = search_form()
+    return render(request, "bhav/showdata.html", {'data':received, 'form':fm})
+
  
-    
+def search_data(request):
+    if request.method == "GET":        
+        fm = search_form(request.GET)
+        print("request received")
+        if fm.is_valid():
+            sch = fm.cleaned_data.get('search_key')
+            cache_data = cache.get('Data')
+            received = json.loads(cache_data)
+            # RegEx for search
+            lst = []
+            for dic in received: 
+                if sch.isnumeric():   
+                    num = dic['code'].strip().lower()
+                    x = re.findall("^"+sch, num)
+                    if x:
+                        lst.append(dic)
+                        print("num : ",lst)
+                        
+                else:
+                    st = dic['name'].strip().lower()        
+                    x = re.findall("^"+sch, st)        
+                    if x:
+                        lst.append(dic)
+                        print("str : ",lst)
+            # return HttpResponse(lst)
+            fm = search_form()      
+            return render(request, "bhav/showdata.html", {'data':lst, 'form':fm})
